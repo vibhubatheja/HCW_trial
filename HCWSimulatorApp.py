@@ -22,23 +22,62 @@ def sph2cart(azimuth,elevation,r):
     z = r * np.sin(elevation)
     return x, y, z
 
-
-
+st.set_page_config(
+    layout="centered", page_title="HCW Simulator", page_icon="📐"
+)
+st.markdown(
+    """
+    <style>
+    body {
+        background-color: ##00c69b;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
 
 
 ######################################################## Define pages
 
 def intro() :
+    retdata= 0
+    st.session_state.retdata = retdata
     st.title("Horizontal Collector Well Simulator")
     st.divider()
 
     st.markdown("The following is a basic :red[app], that can be used to calculate the Drawdown for a Horizonatal collector well (:red[HCW].)")
-    st.markdown(" The app calculations in the app are based using Hantush and Papadopulos (1962) where drawdown is calcualted as follows")
-    image = Image.open('appeqn.png')
-    st.image(image, caption='Drawdonwn acc. Hantush and Papadopulus 1962')
+    st.markdown(" The app calculations in the app are based using Hantush and Papadopulos (1962) where :red[Drawdown] is calcualted as follows")
+    #image = Image.open('appeqn.png')
+    #st.image(image, caption='Drawdonwn acc. Hantush and Papadopulus 1962')
 
+
+     
+
+
+    latext = r'''
+$$
+s_i=\frac{Q_i / L_i}{4 \pi K b}\left\{\begin{array}{c}
+\alpha W\left(\frac{\alpha^2+\beta^2}{4 v^{\prime} t}\right)-\delta W\left(\frac{\delta^2+\beta^2}{4 v^{\prime} t}\right)+2 L_i-2 \beta\left(\tan ^{-1} \frac{\alpha}{\beta}-\tan ^{-1} \frac{\delta}{\beta}\right) \\
++\frac{4 \mathrm{~b}}{\pi} \int_{n=1}^{\infty} \frac{1}{n}\left[L\left(\frac{n \pi \alpha}{b}, \frac{n \pi \beta}{b}\right)-L\left(\frac{n \pi \delta}{b}, \frac{n \pi \beta}{b}\right)\right] \cos \frac{n \pi z}{b} \cos \frac{n \pi z_i}{b}
+\end{array}\right\}
+$$
+'''
+    st.write(latext)
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.write('')
+        
+
+    with col2:
+        #st.image("https://static.streamlit.io/examples/dog.jpg")
+        
+        st.caption("Hantush and Papadopulus 1962")
+
+    with col3:
+        st.write('')
     
-    
+
+        
     
     """
 The Authors of the following App are listed below
@@ -53,19 +92,25 @@ The Authors of the following App are listed below
 ########################################################################################
 
 def datainput():
-    st.header(" Please input the data on this page for the Well")
-    st.divider()
-    st.subheader("The aid of the following figures can be used for Data Input")
+    st.header("Well Data Input")
+    
+    MainTab, InfoTab = st.tabs(["Main", ":blue[Illustrative Figures]"])
+    with InfoTab :
 
-    image2 = Image.open('HYJO-D-21-00139_Fig_01.tif')
+        st.subheader("The aid of the following figures can be used for Data Input")
+
+        image2 = Image.open('HYJO-D-21-00139_Fig_01.tif')
     
 
-    image3=Image.open('HYJO-D-21-00139_Fig_08.tif')
-    st.image(image2,width=600,caption='Figure 1')
-    st.image(image3,width=600, caption="Figure 2")
-
-
-
+        image3=Image.open('HYJO-D-21-00139_Fig_08.tif')
+        st.image(image2,width=600,caption='Figure 1')
+        st.image(image3,width=600, caption="Figure 2")
+    with MainTab :
+        st.subheader("User Instructions")
+        """
+    * Input well data into the side bar
+    * For aid in inputting data, check :blue[Illustrative Figures tab above]
+    """
  # Aquifer characteristics
     st.sidebar.subheader("Aquifer Characteristics")
     aquifer_type = st.sidebar.selectbox("Aquifer Type", ["Confined", "Unconfined"])
@@ -277,9 +322,12 @@ def results(aquifer_type, B, Kv, Kh, Ss, Sy, Kdash, Bdash, numM,nterms, angled_w
         cx=x0+xx
         cy=y0+yy
 
-        
-        ax.plot([x0, endx], [y0, endy], color='k', linewidth=3, marker='o', markersize=10)
-        ax.plot([x0, cx], [y0, cy], color='r', linewidth=3, marker='o', markersize=10)
+        ax.plot([x0, endx], [y0, endy], color='k', linewidth=3, marker='o', markersize=10,label="Lateral")
+        ax.plot([x0, cx], [y0, cy], color='r', linewidth=3, marker='o', markersize=10,label="Screened Lateral")
+
+            # Set labels and title
+    ax.legend()
+
 
     # Set labels and title
     ax.set_xlabel("X")
@@ -295,33 +343,110 @@ def results(aquifer_type, B, Kv, Kh, Ss, Sy, Kdash, Bdash, numM,nterms, angled_w
 
 
     data = base64.b64encode(buffer.read()).decode()
-
-# Generate HTML code to display the image with width attribute
+    # Generate HTML code to display the image with width attribute
     html = f'<img src="data:image/png;base64,{data}" width=900, height=600>'
 
 # Show the HTML code on Streamlit
     st.write(html, unsafe_allow_html=True)
 
+############### Saving Session Data variables to pass on
+    
+    st.session_state.x1 = x1
+    st.session_state.x2 = x2
+    st.session_state.gesamt_absenkung = gesamt_absenkung
+    st.session_state.n_l = n_l
+    st.session_state.LS = LS
+    st.session_state.angle = angle
+    st.session_state.beta2 = beta2
+    st.session_state.x0 = x0
+    st.session_state.y0 = y0
+    st.session_state.L = L
+    st.session_state.retdata = 1
+    
+    
+
+def detresults() :
+    
+
+######### Retriving session state variables
+    retdata= st.session_state.retdata
+    if retdata==1 :
+        
+        x1 = st.session_state.x1
+        x2 = st.session_state.x2
+        gesamt_absenkung = st.session_state.gesamt_absenkung
+        n_l = st.session_state.n_l
+        LS = st.session_state.LS
+        angle = st.session_state.angle
+        beta2 = st.session_state.beta2
+        x0 = st.session_state.x0
+        y0 = st.session_state.y0
+        L = st.session_state.L
+        st.header("Results")
+        #st.divider()
+        counter, surface = st.tabs(["Counter Plot", "Surface Plot"])
+        with counter :
+            
+            st.subheader("Counter Plot")
+            fig, ax = plt.subplots(figsize=(8,6), subplot_kw=dict(aspect="equal"))
+
+            # Create contour plot
+            CS = ax.contour(x1, x2, gesamt_absenkung, linewidths=3, cmap='plasma',levels=10)
+            plt.clabel(CS, inline=True, fontsize=10)
+        
+            # Plot the line
+            for i in range(n_l):
+                Ls=LS[i]
+                L_l = L[i]
+                theta_i = angle[i]
+                beta = beta2[i]
+                xx,yy,zz=sph2cart(theta_i,beta,Ls)
+                XX, YY, ZZ = sph2cart(theta_i, beta, L_l)
+                endx = x0 + XX
+                endy = y0 + YY
+
+                cx=x0+xx
+                cy=y0+yy
+
+            
+                ax.plot([x0, endx], [y0, endy], color='k', linewidth=3, marker='o', markersize=10,label="Lateral")
+                ax.plot([x0, cx], [y0, cy], color='r', linewidth=3, marker='o', markersize=10,label="Screened Lateral")
+
+            # Set labels and title
+            ax.legend()
+            ax.set_xlabel("X")
+            ax.set_ylabel("Y")
+            ax.set_title("Contour plot")
+
+            # Show plot
+            #st.pyplot(fig)
+
+            buffer = BytesIO()
+            fig.savefig(buffer, format='png')
+            buffer.seek(0)
 
 
+            data = base64.b64encode(buffer.read()).decode()
+    
+    # Generate HTML code to display the image with width attribute
+            html = f'<img src="data:image/png;base64,{data}" width=900, height=500>'
+
+    # Show the HTML code on Streamlit
+            st.write(html, unsafe_allow_html=True)
+        
+
+
+    if retdata == 0 :
+        st.subheader("Please Input data and press calculate results to view results")        
 
 
 
 
 
     
-st.set_page_config(page_title='', layout='wide')
+#st.set_page_config(page_title='', layout='wide')
 # Add custom CSS to change the background color
-st.markdown(
-    """
-    <style>
-    body {
-        background-color: ##00c69b;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
+
 
 
 
@@ -351,9 +476,9 @@ if choice == "Data Input":
    #st.write(aquifer_type)
    #st.write(aquifer_type, B, Kv, Kh, Ss, Sy, Kdash, Bdash, numM,nterms, angled_well, beta, x0, y0, z0, Q, n_l,L,LS,angle,r_c,t,z,xmin,xmax,ymin,ymax,size)
    if st.button('Compute Result'):
-       choice="Results"
+       choice="Result"
    if st.sidebar.button('Result')    :
-       choice="Results"
+       choice="Result"
     
 
 
@@ -363,13 +488,18 @@ if choice == "Data Input":
 
 #st.write(beta)
 
-if choice == "Results" :
+if choice == "Result" :
     if  numM is None :
      aquifer_type, B, Kv, Kh, Ss, Sy, Kdash, Bdash, numM,nterms, angled_well, beta, x0, y0, z0, Q, n_l,L,LS,angle,r_c,t,z,xmin,xmax,ymin,ymax,size=datainput()
     #st.write(aquifer_type, B, Kv, Kh, Ss, Sy, Kdash, Bdash, numM,nterms, angled_well, beta, x0, y0, z0, Q, n_l,L,LS,angle,r_c,t,z,xmin,xmax,ymin,ymax,size) 
     #st.experimental_rerun()
     results(aquifer_type, B, Kv, Kh, Ss, Sy, Kdash, Bdash, numM,nterms, angled_well, beta, x0, y0, z0, Q, n_l,L,LS,angle,r_c,t,z,xmin,xmax,ymin,ymax,size)
 
+    
+if choice =="Results" :
+    
+    detresults()
+    
  #   st.write(aquifer_type, B, Kv, Kh, Ss, Sy, Kdash, Bdash, numM,nterms, angled_well, beta, x0, y0, z0, Q, n_l,L,LS,angle,r_c,t,z,xmin,xmax,ymin,ymax,size)
  #  result(aquifer_type, B, Kv, Kh, Ss, Sy, Kdash, Bdash, numM,nterms, angled_well, beta, x0, y0, z0, Q, n_l,L,LS,angle,r_c,t,z,xmin,xmax,ymin,ymax,size)
 
