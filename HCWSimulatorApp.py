@@ -8,6 +8,7 @@ from io import BytesIO
 import base64
 import scipy.special as kt
 from PIL import Image
+from mpl_toolkits.mplot3d import Axes3D
 
 def asinh(x):
     return np.arcsinh(x)
@@ -21,6 +22,22 @@ def sph2cart(azimuth,elevation,r):
     y = r * np.cos(elevation) * np.sin(azimuth)
     z = r * np.sin(elevation)
     return x, y, z
+def surfplot(x1,x2,ges):
+
+
+    # Plot surface
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    ax.plot_trisurf(x1.flatten(),x2.flatten(),ges.flatten())
+
+    # Set labels and title
+    ax.set_xlabel('X')
+    ax.set_ylabel('Y')
+    ax.set_zlabel('Drawdown')
+    ax.set_title('3D Surface Plot')
+
+    # Return plot
+    return fig
 
 st.set_page_config(
     layout="centered", page_title="HCW Simulator", page_icon="📐"
@@ -302,7 +319,7 @@ def results(aquifer_type, B, Kv, Kh, Ss, Sy, Kdash, Bdash, numM,nterms, angled_w
 
 
 
-    fig, ax = plt.subplots(figsize=(8,6), subplot_kw=dict(aspect="equal"))
+    fig, ax = plt.subplots(figsize=(12,10), subplot_kw=dict(aspect="equal"))
 
     # Create contour plot
     CS = ax.contour(x1, x2, gesamt_absenkung, linewidths=3, cmap='plasma',levels=10)
@@ -388,7 +405,8 @@ def detresults() :
         with counter :
             
             st.subheader("Counter Plot")
-            fig, ax = plt.subplots(figsize=(8,6), subplot_kw=dict(aspect="equal"))
+            st.write("COunter Plot for Drawdown")
+            fig, ax = plt.subplots(figsize=(12,10), subplot_kw=dict(aspect="equal"))
 
             # Create contour plot
             CS = ax.contour(x1, x2, gesamt_absenkung, linewidths=3, cmap='plasma',levels=10)
@@ -429,15 +447,22 @@ def detresults() :
             data = base64.b64encode(buffer.read()).decode()
     
     # Generate HTML code to display the image with width attribute
-            html = f'<img src="data:image/png;base64,{data}" width=900, height=500>'
+            html = f'<img src="data:image/png;base64,{data}" width=900, height=600>'
 
     # Show the HTML code on Streamlit
             st.write(html, unsafe_allow_html=True)
-        
+        with surface :
+            st.title('3D Surface Plot')
+            st.write('3D surface plot for Drawdown')
+
+            # Create plot and show in Streamlit app
+            fig = surfplot(x1,x2,gesamt_absenkung)
+            st.pyplot(fig)
+            
 
 
     if retdata == 0 :
-        st.subheader("Please Input data and press calculate results to view results")        
+        st.subheader("Please Input data and Press compute results to view results")        
 
 
 
