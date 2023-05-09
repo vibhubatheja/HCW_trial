@@ -401,7 +401,7 @@ def detresults() :
         L = st.session_state.L
         st.header("Results")
         #st.divider()
-        counter, surface = st.tabs(["Counter Plot", "Surface Plot",""])
+        counter, surface = st.tabs(["Counter Plot", "Surface Plot"])
         with counter :
             
             st.subheader("Counter Plot")
